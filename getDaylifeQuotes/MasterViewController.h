@@ -10,7 +10,11 @@
 
 @class DetailViewController;
 
-@interface MasterViewController : UITableViewController
+@interface MasterViewController : UITableViewController{
+NSDictionary *article;
+}
+
+- (void)fetchQuotes;
 
 @property (strong, nonatomic) DetailViewController *detailViewController;
 

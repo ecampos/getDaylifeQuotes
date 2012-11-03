@@ -15,7 +15,13 @@
 }
 @end
 
-@implementation MasterViewController
+@implementation MasterViewController;
+/*
+-(void)fetchQuotes
+{
+
+    
+}*/
 
 - (void)awakeFromNib
 {
@@ -35,6 +41,24 @@
     UIBarButtonItem *addButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(insertNewObject:)];
     self.navigationItem.rightBarButtonItem = addButton;
     self.detailViewController = (DetailViewController *)[[self.splitViewController.viewControllers lastObject] topViewController];
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+ //Move me back once it's running
+        
+        NSString *daylifeUrl = [NSString stringWithFormat:@"http://freeapi.daylife.com/jsonrest/publicapi/4.10/search_getQuotesBy?query=obama&start_time=2012-10-27&end_time=2012-11-03&offset=&limit=10&sort=relevance&source_filter_id=&block_nsfw=&source_whitelist=&source_blacklist=&accesskey=4d68ec63b744eec43fffad2fa9af98d1&signature=02919f7064f10403310460de2737b7ab"];
+        NSURL *url = [NSURL URLWithString:daylifeUrl];
+        NSData *data = [NSData dataWithContentsOfURL:url];
+        NSError *error;
+        
+        article = [NSJSONSerialization JSONObjectWithData:data
+                                                  options:kNilOptions
+                                                    error:&error];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.tableView reloadData];
+           
+        });
+    });
+    
 }
 
 - (void)didReceiveMemoryWarning
@@ -62,16 +86,27 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return _objects.count;
+    return article.count;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell" forIndexPath:indexPath];
-
-    NSDate *object = _objects[indexPath.row];
-    cell.textLabel.text = [object description];
+    static NSString *CellIdentifier = @"QuoteCell";
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    if (cell == nil) {
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
+    }
+    //article objectAtIndex:indexPath.row];
+    NSLog(@"%@", article);
+    NSString *unusedString = [article objectForKey:@"quote"];
+    NSLog(@"%@", unusedString);
+    NSString *text = [article objectForKey:@"quote_text"];
+    NSString *name =  [[article objectForKey:@"article"] objectForKey:@"name"];
+    cell.textLabel.text = text;
+    cell.detailTextLabel.text = [NSString stringWithFormat:@"by %@", name];
     return cell;
+    
+       NSLog(@"%@", article);
 }
 
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
