@@ -19,8 +19,6 @@
 /*
 -(void)fetchQuotes
 {
-
-    
 }*/
 
 - (void)awakeFromNib
@@ -43,22 +41,44 @@
     self.detailViewController = (DetailViewController *)[[self.splitViewController.viewControllers lastObject] topViewController];
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
- //Move me back once it's running
+        //Move me back once it's running
+     
+//Web Requet to Daylife params: obama, start:28-10-12, end: 10-11-12
+//TODO move params and keys to variables
         
-        NSString *daylifeUrl = [NSString stringWithFormat:@"http://freeapi.daylife.com/jsonrest/publicapi/4.10/search_getQuotesBy?query=obama&start_time=2012-10-27&end_time=2012-11-03&offset=&limit=10&sort=relevance&source_filter_id=&block_nsfw=&source_whitelist=&source_blacklist=&accesskey=4d68ec63b744eec43fffad2fa9af98d1&signature=02919f7064f10403310460de2737b7ab"];
-        NSURL *url = [NSURL URLWithString:daylifeUrl];
+        NSString *daylife  = @"http://freeapi.daylife.com/jsonrest/publicapi/4.10/search_getQuotesBy?";
+        NSString *query = @"obama";
+        NSString *startTime =@"2012-10-28";
+        NSString *endTime = @"2012-11-10";
+        NSString *offset = @"&offset=";
+        NSString *limit =@"10";
+        NSString *sort = @"relevance";
+        NSString *sourceFilter =@"&source_filter_id=";
+        NSString *blockNSFW = @"&block_nsfw=";
+        NSString *whiteList =@"&source_whitelist=";
+        NSString *blackList =@"&source_blacklist=";
+        NSString *accessKey = @"4d68ec63b744eec43fffad2fa9af98d1";
+        NSString *signature = @"02919f7064f10403310460de2737b7ab";
+        
+        
+        NSString *daylifeURL = [NSString stringWithFormat:@"%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@", daylife,@"query=", query,@"&start_time=", startTime, @"&end_time=", endTime, offset, @"&limit=", limit,@"&sort=", sort,sourceFilter, blockNSFW, whiteList,  blackList, @"&accesskey=", accessKey, @"&signature=", signature];
+        
+        NSLog(@"%@", daylifeURL);
+        NSURL *url =[NSURL URLWithString:daylifeURL];
         NSData *data = [NSData dataWithContentsOfURL:url];
         NSError *error;
         
-        article = [NSJSONSerialization JSONObjectWithData:data
+        daylifeResponse = [NSJSONSerialization JSONObjectWithData:data
                                                   options:kNilOptions
                                                     error:&error];
+        
         dispatch_async(dispatch_get_main_queue(), ^{
             [self.tableView reloadData];
+            
            
         });
     });
-    
+
 }
 
 - (void)didReceiveMemoryWarning
@@ -84,29 +104,39 @@
     return 1;
 }
 
+//Number of cells
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return article.count;
+    //TODO 
+    return daylifeResponse.count;
+    
 }
 
+//Filling cells
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    static NSString *CellIdentifier = @"QuoteCell";
+    static NSString *CellIdentifier = @"qouteCell";
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
     }
-    //article objectAtIndex:indexPath.row];
-    NSLog(@"%@", article);
-    NSString *unusedString = [article objectForKey:@"quote"];
-    NSLog(@"%@", unusedString);
-    NSString *text = [article objectForKey:@"quote_text"];
-    NSString *name =  [[article objectForKey:@"article"] objectForKey:@"name"];
+
+      NSLog(@"%@", daylifeResponse);
+    //UNUSED Moving data to sparate containers
+    daylifeNames =  [[[[daylifeResponse objectForKey:@"response"]objectForKey:@"payload"]objectForKey:@"quote"]valueForKey:@"name"];
+    daylifeQuotes = [[[[daylifeResponse objectForKey:@"response"]objectForKey:@"payload"]objectForKey:@"quote"]valueForKey:@"quote_text"];
+    NSLog(@"%@", daylifeNames);
+    NSLog(@"%@", daylifeQuotes);
+    
+    
+    NSString *text =  [[[[daylifeResponse objectForKey:@"response"]objectForKey:@"payload"]objectForKey:@"quote"]valueForKey:@"headline"];
+    
+    NSString *name =  [[[[daylifeResponse objectForKey:@"response"]objectForKey:@"payload"]objectForKey:@"quote"]valueForKey:@"name"];
+
     cell.textLabel.text = text;
+    
     cell.detailTextLabel.text = [NSString stringWithFormat:@"by %@", name];
     return cell;
-    
-       NSLog(@"%@", article);
 }
 
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath

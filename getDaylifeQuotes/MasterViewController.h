@@ -11,10 +11,12 @@
 @class DetailViewController;
 
 @interface MasterViewController : UITableViewController{
-NSDictionary *article;
+    NSDictionary *daylifeResponse;
+    NSDictionary *daylifeNames;
+    NSDictionary *daylifeQuotes;
+    
 }
-
-- (void)fetchQuotes;
+//- (void)fetchQuotes;
 
 @property (strong, nonatomic) DetailViewController *detailViewController;
 
