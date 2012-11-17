@@ -12,11 +12,11 @@
 
 @interface MasterViewController : UITableViewController{
     NSDictionary *daylifeResponse;
-    NSDictionary *daylifeNames;
+    NSDictionary *daylifeNamesQuotes;
     NSDictionary *daylifeQuotes;
     
 }
-//- (void)fetchQuotes;
+- (void)fetchQuotes;
 
 @property (strong, nonatomic) DetailViewController *detailViewController;
 
