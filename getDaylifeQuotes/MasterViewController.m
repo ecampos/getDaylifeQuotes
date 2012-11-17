@@ -35,7 +35,7 @@
         NSString *whiteList =@"&source_whitelist=";
         NSString *blackList =@"&source_blacklist=";
         NSString *accessKey = @"4d68ec63b744eec43fffad2fa9af98d1";
-                               "37d39440cfdfd32ab1375057ec9aa10e
+   //                            "37d39440cfdfd32ab1375057ec9aa10e
         NSString *signature = @"b270c17b4446d0349e416fb6fda17931";
 
  /*       TODO calculate Signature by 
@@ -138,8 +138,8 @@
     NSString *name =  [[daylifeNamesQuotes valueForKey:@"name"]componentsJoinedByString:@""];
     NSLog(@"%@", name);
 
-    cell.textLabel.text = name;
-    cell.detailTextLabel.text = [NSString stringWithFormat:@"by %@", text];
+    cell.textLabel.text = [NSString stringWithFormat:@"by %@", name];
+    cell.detailTextLabel.text = text;
     return cell;
 }
 
