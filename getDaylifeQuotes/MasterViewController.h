@@ -14,6 +14,8 @@
     NSDictionary *daylifeResponse;
     NSDictionary *daylifeNamesQuotes;
     NSDictionary *daylifeQuotes;
+    NSArray *quoteContainer;
+    NSArray *nameContainer;
     
 }
 - (void)fetchQuotes;

@@ -24,28 +24,28 @@
         //Web Requet to Daylife params: mitt, start:28-10-12, end: 10-11-12
         
         NSString *daylife  = @"http://freeapi.daylife.com/jsonrest/publicapi/4.10/search_getQuotesBy?";
-        NSString *query = @"mitt";
+        NSString *query = @"obama";
         NSString *startTime =@"2012-10-28";
         NSString *endTime = @"2012-11-17";
         NSString *offset = @"&offset=";
-        NSString *limit =@"1";
+        NSString *limit =@"10";
         NSString *sort = @"relevance";
         NSString *sourceFilter =@"&source_filter_id=";
         NSString *blockNSFW = @"&block_nsfw=";
         NSString *whiteList =@"&source_whitelist=";
         NSString *blackList =@"&source_blacklist=";
         NSString *accessKey = @"4d68ec63b744eec43fffad2fa9af98d1";
-   //                            "37d39440cfdfd32ab1375057ec9aa10e
-        NSString *signature = @"b270c17b4446d0349e416fb6fda17931";
-
- /*       TODO calculate Signature by 
-        NSString *sharedSecret = @"fd6167e10d2a54abe0206789adbaac09";
-        NSString *fancySignature = [NSString stringWithFormat:@"%@%@%@",accessKey, sharedSecret, query];
-        NSInteger *hashedSignature = MD5HASH(fancySignature);
-
-        NSLog(@"%@", fancySignature);
-        NSLog(@"%@", hashedSignature);
-  */
+        //                            "37d39440cfdfd32ab1375057ec9aa10e
+        NSString *signature = @"02919f7064f10403310460de2737b7ab";
+        
+        /*       TODO calculate Signature by
+         NSString *sharedSecret = @"fd6167e10d2a54abe0206789adbaac09";
+         NSString *fancySignature = [NSString stringWithFormat:@"%@%@%@",accessKey, sharedSecret, query];
+         NSInteger *hashedSignature = MD5HASH(fancySignature);
+         
+         NSLog(@"%@", fancySignature);
+         NSLog(@"%@", hashedSignature);
+         */
         NSString *daylifeURL = [NSString stringWithFormat:@"%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@", daylife,@"query=", query,@"&start_time=", startTime, @"&end_time=", endTime, offset, @"&limit=", limit,@"&sort=", sort,sourceFilter, blockNSFW, whiteList,  blackList, @"&accesskey=", accessKey, @"&signature=", signature];
         
         NSLog(@"%@", daylifeURL);
@@ -62,7 +62,9 @@
             [self.tableView reloadData];
             //Moving data to sparate container
             daylifeNamesQuotes =  [[[daylifeResponse objectForKey:@"response"]objectForKey:@"payload"]objectForKey:@"quote"];
-     
+             quoteContainer = [daylifeNamesQuotes valueForKey:@"quote_text"];
+             nameContainer = [daylifeNamesQuotes valueForKey:@"name"];
+            
         });
     });
     
@@ -83,13 +85,13 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
     self.navigationItem.leftBarButtonItem = self.editButtonItem;
-
+    
     UIBarButtonItem *addButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(insertNewObject:)];
     self.navigationItem.rightBarButtonItem = addButton;
     self.detailViewController = (DetailViewController *)[[self.splitViewController.viewControllers lastObject] topViewController];
     
     self.fetchQuotes;
-
+    
 }
 
 - (void)didReceiveMemoryWarning
@@ -119,7 +121,7 @@
 //Number of rows per cell
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return 2;
+    return 10;
 }
 
 //Filling cells
@@ -131,14 +133,11 @@
     if (cell == nil) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier];
     }
-//
-    NSString *text =  [[daylifeNamesQuotes valueForKey:@"quote_text"]componentsJoinedByString:@""];
-    NSLog(@"%@", text);
     
-    NSString *name =  [[daylifeNamesQuotes valueForKey:@"name"]componentsJoinedByString:@""];
-    NSLog(@"%@", name);
-
-    cell.textLabel.text = [NSString stringWithFormat:@"by %@", name];
+    NSString *text = [NSString stringWithFormat:@"%@", [quoteContainer objectAtIndex:indexPath.row]];
+    NSString *name =  [NSString stringWithFormat:@"%@", [nameContainer objectAtIndex:indexPath.row]];
+    
+    cell.textLabel.text = [NSString stringWithFormat:@"by: %@", name];
     cell.detailTextLabel.text = text;
     return cell;
 }
@@ -146,7 +145,8 @@
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
 {
     // Return NO if you do not want the specified item to be editable.
-    return YES;
+    return NO
+    ;
 }
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
@@ -160,20 +160,20 @@
 }
 
 /*
-// Override to support rearranging the table view.
-- (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath
-{
-}
-*/
+ // Override to support rearranging the table view.
+ - (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath
+ {
+ }
+ */
 
 /*
-// Override to support conditional rearranging of the table view.
-- (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    // Return NO if you do not want the item to be re-orderable.
-    return YES;
-}
-*/
+ // Override to support conditional rearranging of the table view.
+ - (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath
+ {
+ // Return NO if you do not want the item to be re-orderable.
+ return YES;
+ }
+ */
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
