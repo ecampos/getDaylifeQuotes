@@ -15,7 +15,9 @@
 }
 @end
 
+
 @implementation MasterViewController;
+
 
 -(void)fetchQuotes
 {
@@ -23,20 +25,25 @@
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         //Web Requet to Daylife params: mitt, start:28-10-12, end: 10-11-12
         
-        NSString *daylife  = @"http://freeapi.daylife.com/jsonrest/publicapi/4.10/search_getQuotesBy?";
+        NSString *daylife  = @"http://freeapi.daylife.com/jsonrest/publicapi/4.10/search_getRelatedArticles?";
         NSString *query = @"obama";
         NSString *startTime =@"2012-10-28";
-        NSString *endTime = @"2012-11-17";
+        NSString *endTime = @"2012-12-07";
         NSString *offset = @"&offset=";
-        NSString *limit =@"10";
+        NSString *limit =@"50";
         NSString *sort = @"relevance";
         NSString *sourceFilter =@"&source_filter_id=";
+        NSString *includeImage =@"&include_image="; //add to url
+        NSString *includeScores = @"&include_scores="; // add to url
+        NSString *slidingExcerpt = @"&sliding_excerpt=1"; // add to url
+        NSString *hasImage = @"&has_image="; // add to url
+        NSString *headlineDiversity = @"&headline_diversity="; //add to url
         NSString *blockNSFW = @"&block_nsfw=";
         NSString *whiteList =@"&source_whitelist=";
         NSString *blackList =@"&source_blacklist=";
         NSString *accessKey = @"4d68ec63b744eec43fffad2fa9af98d1";
-        //                            "37d39440cfdfd32ab1375057ec9aa10e
         NSString *signature = @"02919f7064f10403310460de2737b7ab";
+        
         
         /*       TODO calculate Signature by
          NSString *sharedSecret = @"fd6167e10d2a54abe0206789adbaac09";
@@ -46,9 +53,9 @@
          NSLog(@"%@", fancySignature);
          NSLog(@"%@", hashedSignature);
          */
-        NSString *daylifeURL = [NSString stringWithFormat:@"%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@", daylife,@"query=", query,@"&start_time=", startTime, @"&end_time=", endTime, offset, @"&limit=", limit,@"&sort=", sort,sourceFilter, blockNSFW, whiteList,  blackList, @"&accesskey=", accessKey, @"&signature=", signature];
-        
+        NSString *daylifeURL = [NSString stringWithFormat:@"%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@", daylife,@"query=", query,@"&start_time=", startTime, @"&end_time=", endTime, includeImage,offset, @"&limit=",limit,includeScores,slidingExcerpt,hasImage, headlineDiversity,@"&sort=",sort,sourceFilter, blockNSFW, whiteList,  blackList, @"&accesskey=", accessKey, @"&signature=", signature];
         NSLog(@"%@", daylifeURL);
+       
         NSURL *url =[NSURL URLWithString:daylifeURL];
         NSData *data = [NSData dataWithContentsOfURL:url];
         NSError *error;
@@ -58,12 +65,15 @@
                                                             error:&error];
         
         dispatch_async(dispatch_get_main_queue(), ^{
-            
+      //      NSLog(@"%@",daylifeResponse);
             [self.tableView reloadData];
             //Moving data to sparate container
-            daylifeNamesQuotes =  [[[daylifeResponse objectForKey:@"response"]objectForKey:@"payload"]objectForKey:@"quote"];
-             quoteContainer = [daylifeNamesQuotes valueForKey:@"quote_text"];
-             nameContainer = [daylifeNamesQuotes valueForKey:@"name"];
+            daylifeArticles =  [[[daylifeResponse objectForKey:@"response"]objectForKey:@"payload"]objectForKey:@"article"];
+             articleContainer = [daylifeArticles valueForKey:@"headline"];
+            NSLog(@"%@", articleContainer);
+             nameContainer = [[[[[daylifeResponse objectForKey:@"response"]objectForKey:@"payload"]objectForKey:@"article"]valueForKey:@"source"] valueForKey:@"name"];
+  
+            NSLog(@"%@", nameContainer);
             
         });
     });
@@ -81,16 +91,17 @@
 
 - (void)viewDidLoad
 {
+    self.fetchQuotes;
     NSLog(@"viewDidLoad");
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
-    self.navigationItem.leftBarButtonItem = self.editButtonItem;
+ //   self.navigationItem.leftBarButtonItem = self.editButtonItem;
     
-    UIBarButtonItem *addButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(insertNewObject:)];
-    self.navigationItem.rightBarButtonItem = addButton;
+//    UIBarButtonItem *addButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(insertNewObject:)];
+  //  self.navigationItem.rightBarButtonItem = addButton;
     self.detailViewController = (DetailViewController *)[[self.splitViewController.viewControllers lastObject] topViewController];
     
-    self.fetchQuotes;
+    
     
 }
 
@@ -115,13 +126,13 @@
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     NSLog(@"%@", @"count of Cells");
-    return 10;
+    return 1;
 }
 
 //Number of rows per cell
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return 10;
+    return 50;
 }
 
 //Filling cells
@@ -134,10 +145,10 @@
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier];
     }
     
-    NSString *text = [NSString stringWithFormat:@"%@", [quoteContainer objectAtIndex:indexPath.row]];
+    NSString *text = [NSString stringWithFormat:@"%@", [articleContainer objectAtIndex:indexPath.row]];
     NSString *name =  [NSString stringWithFormat:@"%@", [nameContainer objectAtIndex:indexPath.row]];
     
-    cell.textLabel.text = [NSString stringWithFormat:@"by: %@", name];
+    cell.textLabel.text = [NSString stringWithFormat:@"%@", name];
     cell.detailTextLabel.text = text;
     return cell;
 }

@@ -12,10 +12,11 @@
 
 @interface MasterViewController : UITableViewController{
     NSDictionary *daylifeResponse;
-    NSDictionary *daylifeNamesQuotes;
+    NSDictionary *daylifeArticles;
     NSDictionary *daylifeQuotes;
-    NSArray *quoteContainer;
+    NSArray *articleContainer;
     NSArray *nameContainer;
+    
     
 }
 - (void)fetchQuotes;
