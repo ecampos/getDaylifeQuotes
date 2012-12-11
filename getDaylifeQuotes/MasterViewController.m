@@ -82,7 +82,7 @@
                                                           options:kNilOptions
                                                             error:&error];
 
-        NSLog(@"%@", daylifeResponse);
+        NSLog(@"%@", twitterResponse);
         dispatch_async(dispatch_get_main_queue(), ^{
             
         //Moving daylife data to sparate container in order to reduce duplicate code
@@ -159,11 +159,14 @@
    if (cell == nil) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier];
     }
+    NSString *twitterText = [NSString stringWithFormat:@"%@", [[[twitterResponse objectForKey:@"results"] valueForKey:@"text"] objectAtIndex:indexPath.row]];
+    NSString *twitterName = [NSString stringWithFormat:@"%@", [[[twitterResponse objectForKey:@"results"]valueForKey:@"from_user_name"] objectAtIndex:indexPath.row]];
+
    
     NSString *text = [NSString stringWithFormat:@"%@", [[daylifeArticles valueForKey:@"headline"] objectAtIndex:indexPath.row]];
     NSString *name =  [NSString stringWithFormat:@"%@", [[[daylifeArticles valueForKey:@"source"] valueForKey:@"name"] objectAtIndex:indexPath.row]];
-    cell.textLabel.text = [NSString stringWithFormat:@"%@", name];
-    cell.detailTextLabel.text = text;
+    cell.textLabel.text = [NSString stringWithFormat:@"%@", twitterName];
+    cell.detailTextLabel.text = twitterText;
     return cell;
 }
 
