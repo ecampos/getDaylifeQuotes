@@ -12,14 +12,16 @@
 
 @interface MasterViewController : UITableViewController{
     NSDictionary *daylifeResponse;
+    NSDictionary *twitterResponse;
     NSDictionary *daylifeArticles;
     NSDictionary *daylifeQuotes;
     NSArray *articleContainer;
-    NSArray *nameContainer;
+    NSArray *sourceContainer;
+
     
     
 }
-- (void)fetchQuotes;
+- (void)fetchData;
 
 @property (strong, nonatomic) DetailViewController *detailViewController;
 

@@ -19,18 +19,28 @@
 @implementation MasterViewController;
 
 
--(void)fetchQuotes
+-(void)fetchData
 {
     NSLog(@"fetchQutes");
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        //Web Requet to Daylife params: mitt, start:28-10-12, end: 10-11-12
-        
-        NSString *daylife  = @"http://freeapi.daylife.com/jsonrest/publicapi/4.10/search_getRelatedArticles?";
+        //input parameters
         NSString *query = @"obama";
-        NSString *startTime =@"2012-10-28";
         NSString *endTime = @"2012-12-07";
+        NSString *startTime =@"2012-10-28";
+        
+        //Daylife parameters
+        NSString *daylife  = @"http://freeapi.daylife.com/jsonrest/publicapi/4.10/search_getRelatedArticles?";
+
+        NSString *limit =@"10";
+        NSString *accessKey = @"4d68ec63b744eec43fffad2fa9af98d1";
+        NSString *signature = @"02919f7064f10403310460de2737b7ab";
+        
+        //Twitter parameters
+        NSString *twitter = @"http://search.twitter.com/search.json?q=";
+        
+        
+  /*    NICE TO HAVE PARAMETERS not necessary for request to work
         NSString *offset = @"&offset=";
-        NSString *limit =@"50";
         NSString *sort = @"relevance";
         NSString *sourceFilter =@"&source_filter_id=";
         NSString *includeImage =@"&include_image="; //add to url
@@ -41,40 +51,45 @@
         NSString *blockNSFW = @"&block_nsfw=";
         NSString *whiteList =@"&source_whitelist=";
         NSString *blackList =@"&source_blacklist=";
-        NSString *accessKey = @"4d68ec63b744eec43fffad2fa9af98d1";
-        NSString *signature = @"02919f7064f10403310460de2737b7ab";
-        
-        
-        /*       TODO calculate Signature by
+   
+   
+!!!TODO calculate Signature by hashing access key, shared secret and query!!!!
+   
          NSString *sharedSecret = @"fd6167e10d2a54abe0206789adbaac09";
          NSString *fancySignature = [NSString stringWithFormat:@"%@%@%@",accessKey, sharedSecret, query];
          NSInteger *hashedSignature = MD5HASH(fancySignature);
-         
+         %@%@%@%@%@%@%@%@%@%@%@%@
          NSLog(@"%@", fancySignature);
-         NSLog(@"%@", hashedSignature);
-         */
-        NSString *daylifeURL = [NSString stringWithFormat:@"%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@", daylife,@"query=", query,@"&start_time=", startTime, @"&end_time=", endTime, includeImage,offset, @"&limit=",limit,includeScores,slidingExcerpt,hasImage, headlineDiversity,@"&sort=",sort,sourceFilter, blockNSFW, whiteList,  blackList, @"&accesskey=", accessKey, @"&signature=", signature];
-        NSLog(@"%@", daylifeURL);
-       
-        NSURL *url =[NSURL URLWithString:daylifeURL];
-        NSData *data = [NSData dataWithContentsOfURL:url];
+         NSLog(@"%@", hashedSignature);*/
+        
+        //Daylife request perparation
+        NSString *daylifeURLString = [NSString stringWithFormat:@"%@%@%@%@%@%@%@%@%@%@%@%@%@", daylife,@"query=", query,@"&start_time=", startTime, @"&end_time=", endTime, @"&limit=",limit, @"&accesskey=", accessKey, @"&signature=", signature];
+        NSURL *daylifeURL =[NSURL URLWithString:daylifeURLString];
+        NSData *daylifeData = [NSData dataWithContentsOfURL:daylifeURL];
+
+        //Twitter request preparation
+        NSString *twitterURLString = [NSString stringWithFormat:@"%@%@%@%@", twitter, query, @"%20until:", endTime];
+        NSURL *twitterURL = [NSURL URLWithString:twitterURLString];
+        NSData *twitterData = [NSData dataWithContentsOfURL:twitterURL];
+        
+        //NSerror is required for web requests
         NSError *error;
         
-        daylifeResponse = [NSJSONSerialization JSONObjectWithData:data
+        twitterResponse = [NSJSONSerialization JSONObjectWithData:twitterData
                                                           options:kNilOptions
                                                             error:&error];
-        
+        daylifeResponse = [NSJSONSerialization JSONObjectWithData:daylifeData
+                                                          options:kNilOptions
+                                                            error:&error];
+
+        NSLog(@"%@", daylifeResponse);
         dispatch_async(dispatch_get_main_queue(), ^{
-      //      NSLog(@"%@",daylifeResponse);
-            [self.tableView reloadData];
-            //Moving data to sparate container
-            daylifeArticles =  [[[daylifeResponse objectForKey:@"response"]objectForKey:@"payload"]objectForKey:@"article"];
-             articleContainer = [daylifeArticles valueForKey:@"headline"];
-            NSLog(@"%@", articleContainer);
-             nameContainer = [[[[[daylifeResponse objectForKey:@"response"]objectForKey:@"payload"]objectForKey:@"article"]valueForKey:@"source"] valueForKey:@"name"];
-  
-            NSLog(@"%@", nameContainer);
             
+        //Moving daylife data to sparate container in order to reduce duplicate code
+        daylifeArticles =  [[[daylifeResponse objectForKey:@"response"]objectForKey:@"payload"] objectForKey:@"article"]; NSLog(@"%@", daylifeArticles);
+        
+        [self.tableView reloadData];
+        
         });
     });
     
@@ -91,7 +106,7 @@
 
 - (void)viewDidLoad
 {
-    self.fetchQuotes;
+    self.fetchData;
     NSLog(@"viewDidLoad");
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
@@ -122,17 +137,17 @@
 }
 
 #pragma mark - Table View
-//Number of cells
+
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     NSLog(@"%@", @"count of Cells");
     return 1;
 }
 
-//Number of rows per cell
+//Number of cells
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return 50;
+    return 10;
 }
 
 //Filling cells
@@ -141,13 +156,12 @@
     NSLog(@"filling cells");
     static NSString *CellIdentifier = @"qouteCell";
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-    if (cell == nil) {
+   if (cell == nil) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier];
     }
-    
-    NSString *text = [NSString stringWithFormat:@"%@", [articleContainer objectAtIndex:indexPath.row]];
-    NSString *name =  [NSString stringWithFormat:@"%@", [nameContainer objectAtIndex:indexPath.row]];
-    
+   
+    NSString *text = [NSString stringWithFormat:@"%@", [[daylifeArticles valueForKey:@"headline"] objectAtIndex:indexPath.row]];
+    NSString *name =  [NSString stringWithFormat:@"%@", [[[daylifeArticles valueForKey:@"source"] valueForKey:@"name"] objectAtIndex:indexPath.row]];
     cell.textLabel.text = [NSString stringWithFormat:@"%@", name];
     cell.detailTextLabel.text = text;
     return cell;
